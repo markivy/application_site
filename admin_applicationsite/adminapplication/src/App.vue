@@ -1,4 +1,3 @@
-
 <template>
   <div class="app">
     <!-- Animated Background -->
@@ -16,23 +15,25 @@
           <h1 class="brand-text">Xisto</h1>
         </div>
         <div class="nav-tabs">
-          <button 
-            @click="currentView = 'login'" 
-            :class="['nav-tab', { active: currentView === 'login' }]"
-          >
+          <div v-show="submitMessagevisibility" class="action-btn danger" name="SubmitMessage">
+            <span>
+              {{ submitMessage.text}}
+            </span>
+          </div>
+          <button ref="loginbtn" v-show="currentView !== 'admin'" @click="currentView = 'login'"
+            :class="['nav-tab', { active: currentView === 'login' }]">
             <span class="tab-text">Login</span>
             <div class="tab-indicator"></div>
           </button>
-          <button v-if="authToken" @click="removeToken">
+          <!-- <button v-if="authToken" @click="removeToken">
             remove token
-          </button>
-          <button 
-            @click="currentView = 'admin'" 
-            :class="['nav-tab', { active: currentView === 'admin' }]"
-          >
+          </button> -->
+          <button ref="adminbtn" v-show="currentView !== 'login'" @click="currentView = 'admin'"
+            :class="['nav-tab', { active: currentView === 'admin' }]">
             <span class="tab-text">Dashboard</span>
             <div class="tab-indicator"></div>
           </button>
+          <button v-show="currentView == 'admin'" @click="removeToken()" class="nav-tab">Sair</button>
         </div>
       </div>
     </nav>
@@ -47,11 +48,13 @@
       <div class="login-form">
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input v-model="email" name = "email" type="text" class="modern-input" placeholder="digite seu email" required />
+          <input v-model="email" name="email" type="text" class="modern-input" placeholder="digite seu email"
+            required />
         </div>
         <div class="form-group">
           <label class="form-label">Senha</label>
-          <input v-model="password" name = "password" type="password" class="modern-input" placeholder="digite sua senha" required />
+          <input v-model="password" name="password" type="password" class="modern-input" placeholder="digite sua senha"
+            required />
         </div>
         <button type="submit" class="submit-btn" @click="sendLogin">Login</button>
       </div>
@@ -64,7 +67,7 @@
         <div class="stats-card">
           <div class="stat-item">
             <span class="stat-number">{{ applications.length }}</span>
-            <span class="stat-label">Total Applications</span>
+            <span class="stat-label">Total de curriculos</span>
           </div>
         </div>
       </div>
@@ -73,30 +76,27 @@
         <div v-if="applications.length === 0" class="empty-state">
           <div class="empty-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5"/>
-              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"
+                stroke-width="1.5" />
+              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="1.5" />
+              <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.5" />
+              <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="1.5" />
             </svg>
           </div>
-          <h3 class="empty-title">No Applications Yet</h3>
-          <p class="empty-description">Applications will appear here once candidates start applying</p>
+          <h3 class="empty-title">Sem curriculos novos</h3>
+          <p class="empty-description">Os curriculos irão aparecer aqui quando as pessoas aplicarem.</p>
         </div>
 
         <div v-else class="applications-grid">
-          <div 
-            v-for="(application, index) in applications" 
-            :key="application.id"
-            class="application-card"
-            :style="{ animationDelay: `${index * 0.1}s` }"
-          >
+          <div v-for="(application, index) in applications" :key="application.index" class="application-card"
+            :style="{ animationDelay: `${index * 0.1}s` }">
             <div class="card-header">
               <div class="applicant-info">
-                <h3 class="applicant-name">{{ application.name }}</h3>
-                <p class="applicant-contact">{{ application.contact }}</p>
+                <h3 class="applicant-name">{{ application.nome }}</h3>
+                <p class="applicant-contact">{{ application.numero }}</p>
               </div>
               <div class="application-meta">
-                <span class="application-date">{{ formatDate(application.submittedAt) }}</span>
+                <span class="application-date">{{ formatDate(application.CreatedAt) }}</span>
               </div>
             </div>
 
@@ -104,27 +104,29 @@
               <div class="file-info">
                 <div class="file-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
-                    <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor"
+                      stroke-width="2" />
+                    <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" />
                   </svg>
                 </div>
-                <span class="file-name">{{ application.cvFileName }}</span>
+                <span class="file-name">{{ application.nomearquivo }}</span>
               </div>
             </div>
 
             <div class="card-actions">
               <button @click="downloadCV(application)" class="action-btn primary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"/>
-                  <polyline points="7,10 12,15 17,10" stroke="currentColor" stroke-width="2"/>
-                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2"/>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" />
+                  <polyline points="7,10 12,15 17,10" stroke="currentColor" stroke-width="2" />
+                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" />
                 </svg>
                 Download
               </button>
               <button @click="deleteApplication(application.id)" class="action-btn danger">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2"/>
-                  <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" stroke="currentColor" stroke-width="2"/>
+                  <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" />
+                  <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"
+                    stroke="currentColor" stroke-width="2" />
                 </svg>
                 Delete
               </button>
@@ -134,39 +136,36 @@
       </div>
     </div>
   </div>
-<div v-if="currentView === 'loading'" class="loading-view">
-  <div class="loading-spinner">
-    <svg class="spinner" width="64" height="64" viewBox="0 0 50 50">
-      <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-    </svg>
-    <div class="loading-text">
-      Carregando...
-      <span class="dot dot1">.</span>
-      <span class="dot dot2">.</span>
-      <span class="dot dot3">.</span>
+  <div v-if="currentView === 'loading'" class="loading-view">
+    <div class="loading-spinner">
+      <svg class="spinner" width="64" height="64" viewBox="0 0 50 50">
+        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+      </svg>
+      <div class="loading-text">
+        Carregando...
+        <span class="dot dot1">.</span>
+        <span class="dot dot2">.</span>
+        <span class="dot dot3">.</span>
+      </div>
     </div>
   </div>
-</div>
 
 
 </template>
 
 <script setup>
-import { AlertTriangle } from 'lucide-vue-next'
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 
 const currentView = ref('loading')
 const authToken = ref(localStorage.getItem('authToken'))
 console.log('authToken', authToken.value)
-const submitMessage = ref(null)
+const submitMessage = ref('text', 'type')
 const applications = ref([])
 const email = ref('')
 const password = ref('')
-const form = reactive({
-  name: '',
-  contact: '',
-  cvFile: null
-})
+
+const loginbtn = ref(null)
+const adminbtn = ref(null)
 
 watch(currentView, (newView) => {
   if (newView === 'admin') {
@@ -221,20 +220,23 @@ const removeToken = () => {
   currentView.value = 'login'
 }
 
+const submitMessagevisibility = ref(false)
 const showMessage = (text, type) => {
+  submitMessagevisibility.value = true
   submitMessage.value = { text, type }
   setTimeout(() => {
-    submitMessage.value = null
+    submitMessage.value = "",""
+    submitMessagevisibility.value = false
   }, 5000)
 }
 
 const loadApplications = async () => {
 
   if (!authToken.value) {
-      currentView.value = 'login'
-      alert('Por favor, faça login para acessar o painel.')
-      return
-    }
+    currentView.value = 'login'
+    alert('Por favor, faça login para acessar o painel.')
+    return
+  }
   console.log('authToken', authToken.value)
   const response = await fetch('http://147.79.104.229:5678/webhook/loadapplications', {
     method: 'POST',
@@ -247,6 +249,18 @@ const loadApplications = async () => {
       },
       action: 'loadapplications'
     })
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error('Erro ao carregar candidaturas')
+    }
+    return res.json()
+  }).then(data => {
+    console.log('data', data)
+    applications.value = data || []
+    currentView.value = 'admin'
+  }).catch(error => {
+    console.error('Erro ao carregar candidaturas:', error)
+    showMessage('Erro ao carregar candidaturas. Por favor, tente novamente.', 'error')
   })
 }
 
@@ -261,8 +275,8 @@ const formatDate = (dateString) => {
 
 const downloadCV = (application) => {
   const link = document.createElement('a')
-  link.href = application.cvFileData
-  link.download = application.cvFileName
+  link.href = application.curriculo
+  link.download = application.nomearquivo
   link.click()
 }
 
@@ -275,72 +289,74 @@ const deleteApplication = (id) => {
 
 // Para garantir um login seguro, é importante enviar as credenciais (usuário e senha) de forma segura, preferencialmente sobre HTTPS, e nunca armazenar ou trafegar senhas em texto puro. Além disso, recomenda-se implementar autenticação baseada em tokens (como JWT), aplicar rate limiting, e proteger contra ataques de força bruta. O ideal é que a senha seja enviada já em hash, mas normalmente o hash é feito no backend. Aqui está um exemplo melhorado, mas lembre-se que o endpoint deve ser HTTPS e o backend deve tratar a segurança:
 const sendLogin = async () => {
-    try {
-        // Validação básica no frontend
-        if (!email.value || !password.value) {
-            console.log('faltando usuario ou senha');
-            showMessage('Por favor, preencha usuário e senha.');
-            return;
-        }
-
-        // --- ATENÇÃO: USE SEMPRE HTTPS EM PRODUÇÃO! ---
-        const response = await fetch('http://147.79.104.229:5678/webhook/easyauth', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                payload: {
-                    email: email.value,
-                    // A senha é enviada em texto puro via HTTPS para o backend,
-                    // onde ela deve ser hashed e comparada com o hash armazenado.
-                    password: password.value
-                },
-                action: 'login'
-            })
-        });
-
-        if (!response.ok) {
-            let errorData = {};
-            try {
-                // Tenta parsear o corpo da resposta como JSON.
-                // Se o backend enviar HTML ou texto puro em caso de erro, isso falhará.
-                errorData = await response.json();
-            } catch (jsonParseError) {
-                // Captura o erro se o corpo não for um JSON válido.
-                console.warn('Erro ao parsear JSON da resposta de erro:', jsonParseError);
-                errorData.message = 'Formato de resposta de erro inválido do servidor.';
-            }
-
-            // Lança um erro com mais detalhes, usando a mensagem do backend se disponível.
-            const errorMessage = errorData.message || 'Erro sem mensagem específica.';
-            throw new Error(`${response.status} - ${response.statusText} - ${errorMessage}`);
-        }
-
-        const data = await response.json();
-
-        if (data.token) {
-            localStorage.setItem('authToken', data.token);
-            authToken.value = data.token
-            console.log('Login realizado com sucesso!', 'success');
-            currentView.value = 'admin';
-        } else {
-            // Este bloco só será alcançado se response.ok for true (status 2xx)
-            // mas o token não estiver presente. Isso pode indicar uma lógica de backend falha
-            // ou um tipo de "erro lógico" retornado com status 200.
-            console.log('Não foi possível obter o token. Usuário ou senha inválidos ou problema no servidor.', 'error');
-        }
-    } catch (error) {
-        console.error('Erro ao enviar login:', error);
-        // showMessage pode exibir '401 - Unauthorized - Usuário ou senha inválidos.'
-        // ou 'Erro ao enviar login. Por favor, tente novamente.' para erros de rede.
-        console.log(`Erro no login: ${error.message || 'Por favor, tente novamente.'}`, 'error');
+  try {
+    // Validação básica no frontend
+    if (!email.value || !password.value) {
+      console.log('faltando usuario ou senha');
+      showMessage('Por favor, preencha usuário e senha.');
+      return;
     }
+
+    // --- ATENÇÃO: USE SEMPRE HTTPS EM PRODUÇÃO! ---
+    const response = await fetch('http://147.79.104.229:5678/webhook/easyauth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        payload: {
+          email: email.value,
+          // A senha é enviada em texto puro via HTTPS para o backend,
+          // onde ela deve ser hashed e comparada com o hash armazenado.
+          password: password.value
+        },
+        action: 'login'
+      })
+    });
+
+    if (!response.ok) {
+      let errorData = {};
+      try {
+        // Tenta parsear o corpo da resposta como JSON.
+        // Se o backend enviar HTML ou texto puro em caso de erro, isso falhará.
+        errorData = await response.json();
+      } catch (jsonParseError) {
+        // Captura o erro se o corpo não for um JSON válido.
+        console.warn('Erro ao parsear JSON da resposta de erro:', jsonParseError);
+        errorData.message = 'Formato de resposta de erro inválido do servidor.';
+      }
+
+      // Lança um erro com mais detalhes, usando a mensagem do backend se disponível.
+      const errorMessage = errorData.message || 'Erro sem mensagem específica.';
+      throw new Error(`${response.status} - ${response.statusText} - ${errorMessage}`);
+    }
+
+    const data = await response.json();
+
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      authToken.value = data.token
+      console.log('Login realizado com sucesso!', 'success');
+      currentView.value = 'admin';
+    } else {
+      // Este bloco só será alcançado se response.ok for true (status 2xx)
+      // mas o token não estiver presente. Isso pode indicar uma lógica de backend falha
+      // ou um tipo de "erro lógico" retornado com status 200.
+      console.log('Não foi possível obter o token. Usuário ou senha inválidos ou problema no servidor.', 'error');
+    }
+  } catch (error) {
+    console.error('Erro ao enviar login:', error);
+    // showMessage pode exibir '401 - Unauthorized - Usuário ou senha inválidos.'
+    // ou 'Erro ao enviar login. Por favor, tente novamente.' para erros de rede.
+    console.log(`Erro no login: ${error.message || 'Por favor, tente novamente.'}`, 'error');
+  }
 };
 
 onMounted(() => {
   if (authToken.value) {
     currentView.value = 'admin'
+  } else {
+    currentView.value = 'login'
   }
 })
 </script>
@@ -406,9 +422,19 @@ onMounted(() => {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-30px) rotate(120deg); }
-  66% { transform: translateY(20px) rotate(240deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(-30px) rotate(120deg);
+  }
+
+  66% {
+    transform: translateY(20px) rotate(240deg);
+  }
 }
 
 /* Navigation */
@@ -608,7 +634,7 @@ onMounted(() => {
   transition: width 0.3s ease;
 }
 
-.modern-input:focus + .input-border {
+.modern-input:focus+.input-border {
   width: 100%;
 }
 
@@ -748,8 +774,15 @@ onMounted(() => {
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Dashboard */
@@ -981,62 +1014,99 @@ onMounted(() => {
   .card-actions {
     flex-direction: column;
   }
+
   .loading-view {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
 
-.loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.spinner {
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-.path {
-  stroke: #6c63ff;
-  stroke-linecap: round;
-  animation: dash 1.5s ease-in-out infinite;
-}
-@keyframes dash {
-  0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-  50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
-  100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
-}
+  .spinner {
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
 
-.loading-text {
-  color: #fff;
-  font-size: 1.5rem;
-  letter-spacing: 2px;
-  display: flex;
-  align-items: center;
-}
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 
-.dot {
-  opacity: 0;
-  animation: blink 1.4s infinite both;
-  font-size: 2rem;
-  margin-left: 2px;
-}
-.dot1 { animation-delay: 0s; }
-.dot2 { animation-delay: 0.2s; }
-.dot3 { animation-delay: 0.4s; }
+  .path {
+    stroke: #6c63ff;
+    stroke-linecap: round;
+    animation: dash 1.5s ease-in-out infinite;
+  }
 
-@keyframes blink {
-  0%, 80%, 100% { opacity: 0; }
-  40% { opacity: 1; }
-}
+  @keyframes dash {
+    0% {
+      stroke-dasharray: 1, 150;
+      stroke-dashoffset: 0;
+    }
+
+    50% {
+      stroke-dasharray: 90, 150;
+      stroke-dashoffset: -35;
+    }
+
+    100% {
+      stroke-dasharray: 90, 150;
+      stroke-dashoffset: -124;
+    }
+  }
+
+  .loading-text {
+    color: #fff;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+  }
+
+  .dot {
+    opacity: 0;
+    animation: blink 1.4s infinite both;
+    font-size: 2rem;
+    margin-left: 2px;
+  }
+
+  .dot1 {
+    animation-delay: 0s;
+  }
+
+  .dot2 {
+    animation-delay: 0.2s;
+  }
+
+  .dot3 {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes blink {
+
+    0%,
+    80%,
+    100% {
+      opacity: 0;
+    }
+
+    40% {
+      opacity: 1;
+    }
+  }
 }
 </style>
